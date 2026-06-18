@@ -1,0 +1,106 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+// Paleta verde esmeralda — cor do campo de tênis
+$emerald-palette: (
+  50:   #e3f5ef,
+  100:  #b9e5d7,
+  200:  #8bd4be,
+  300:  #5cc3a4,
+  400:  #39b58f,
+  500:  #1D9E75,
+  600:  #198f69,
+  700:  #147d5b,
+  800:  #0f6b4d,
+  900:  #084d36,
+  A100: #7effce,
+  A200: #4bffc0,
+  A400: #18ffb2,
+  A700: #00ffaa,
+  contrast: (
+    50:   rgba(0, 0, 0, .87),
+    100:  rgba(0, 0, 0, .87),
+    200:  rgba(0, 0, 0, .87),
+    300:  rgba(0, 0, 0, .87),
+    400:  rgba(0, 0, 0, .87),
+    500:  white,
+    600:  white,
+    700:  white,
+    800:  white,
+    900:  white,
+    A100: rgba(0, 0, 0, .87),
+    A200: rgba(0, 0, 0, .87),
+    A400: rgba(0, 0, 0, .87),
+    A700: rgba(0, 0, 0, .87),
+  )
+);
+
+$primary: mat.define-palette($emerald-palette, 500, 300, 700);
+$accent:  mat.define-palette($emerald-palette, A200, A100, A700);
+$warn:    mat.define-palette(mat.$red-palette);
+
+$theme: mat.define-light-theme((
+  color: (primary: $primary, accent: $accent, warn: $warn),
+  typography: mat.define-typography-config(),
+  density: 0
+));
+
+@include mat.all-component-themes($theme);
+
+// Variáveis globais
+:root {
+  --color-topbar:   #0f1923;
+  --color-primary:  #1D9E75;
+  --color-surface:  #f5f7f6;
+  --color-border:   #e0e0e0;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--color-surface);
+}
+
+// Layout shell
+.app-topbar {
+  background-color: var(--color-topbar) !important;
+  color: white !important;
+
+  .mat-icon, .topbar-title {
+    color: white;
+  }
+
+  .topbar-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+
+  .topbar-accent {
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+}
+
+// Conteúdo principal
+.page-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    color: #1a1a2e;
+  }
+}

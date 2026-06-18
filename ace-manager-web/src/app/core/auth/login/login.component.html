@@ -1,0 +1,42 @@
+<div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#0f1923">
+  <mat-card style="width:380px; padding:32px; border-radius:12px">
+    <mat-card-header style="margin-bottom:8px">
+      <mat-card-title style="font-size:26px; font-weight:700; letter-spacing:.5px">
+        <span style="color:#1D9E75">ACE</span> Manager
+      </mat-card-title>
+      <mat-card-subtitle>Entre com suas credenciais</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content style="margin-top:24px">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" style="width:100%">
+          <mat-label>E-mail</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email">
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>E-mail é obrigatório</mat-error>
+          }
+          @if (form.controls.email.hasError('email')) {
+            <mat-error>E-mail inválido</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width:100%; margin-top:8px">
+          <mat-label>Senha</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="current-password">
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>Senha é obrigatória</mat-error>
+          }
+        </mat-form-field>
+
+        @if (errorMessage) {
+          <p style="color: #f44336; font-size:14px; margin:8px 0">{{ errorMessage }}</p>
+        }
+
+        <button mat-raised-button color="primary" type="submit"
+                style="width:100%; margin-top:16px" [disabled]="loading">
+          {{ loading ? 'Entrando...' : 'Entrar' }}
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

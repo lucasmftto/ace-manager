@@ -1,0 +1,35 @@
+# ──────────────────────────────────────────
+# Backend — Java / Maven / Spring Boot
+# ──────────────────────────────────────────
+ace-manager-api/target/
+ace-manager-api/.mvn/wrapper/maven-wrapper.jar
+ace-manager-api/*.class
+
+# Spring Boot
+ace-manager-api/application-local.yml
+ace-manager-api/src/main/resources/application-local.yml
+
+# ──────────────────────────────────────────
+# Frontend — Node / Angular
+# ──────────────────────────────────────────
+ace-manager-web/node_modules/
+ace-manager-web/dist/
+ace-manager-web/.angular/
+
+# ──────────────────────────────────────────
+# IDEs e editores
+# ──────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ──────────────────────────────────────────
+# Logs e temporários
+# ──────────────────────────────────────────
+*.log
+*.tmp
+*.bak

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude update *)",
+      "Bash(mvn clean *)",
+      "Bash(python3 -c \"import bcrypt; print\\(bcrypt.hashpw\\(b'1q2w3e', bcrypt.gensalt\\(10\\)\\).decode\\(\\)\\)\")",
+      "Bash(htpasswd -bnBC 10 \"\" \"1q2w3e\")",
+      "Bash(npm install *)",
+      "Bash(ng build *)",
+      "Bash(node -e \"const m = require\\('./node_modules/ngx-currency'\\); console.log\\(Object.keys\\(m\\)\\)\")",
+      "Bash(npm view *)",
+      "Bash(node *)"
+    ]
+  }
+}

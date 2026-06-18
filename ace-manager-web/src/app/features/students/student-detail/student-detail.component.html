@@ -1,0 +1,109 @@
+<div class="page-container">
+  @if (loading) {
+    <p>Carregando...</p>
+  } @else if (error || !student) {
+    <p>Aluno não encontrado.</p>
+    <button mat-button (click)="goBack()">Voltar</button>
+  } @else {
+    <div class="page-header">
+      <div style="display:flex; align-items:center; gap:16px">
+        <button mat-icon-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h1>{{ student.name }}</h1>
+        <mat-chip [color]="student.status === 'ACTIVE' ? 'accent' : 'warn'" highlighted>
+          {{ statusLabels[student.status] }}
+        </mat-chip>
+      </div>
+      <button mat-raised-button color="primary" (click)="editStudent()">
+        <mat-icon>edit</mat-icon>
+        Editar
+      </button>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px">
+      <!-- Dados pessoais -->
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Dados Pessoais</mat-card-title>
+        </mat-card-header>
+        <mat-card-content style="margin-top:16px">
+          <div class="info-row"><span>Telefone:</span> <span>{{ student.phone | formatPhone }}</span></div>
+          <div class="info-row"><span>E-mail:</span>   <span>{{ student.email || '—' }}</span></div>
+          <div class="info-row"><span>Nascimento:</span>
+            <span>{{ student.birthDate ? (student.birthDate | date:'dd/MM/yyyy') : '—' }}</span>
+          </div>
+
+          @if (isMinor()) {
+            <mat-divider style="margin:16px 0"></mat-divider>
+            <p style="font-weight:500; margin:0 0 8px">Responsável</p>
+            <div class="info-row"><span>Nome:</span>     <span>{{ student.guardianName || '—' }}</span></div>
+            <div class="info-row"><span>Telefone:</span> <span>{{ student.guardianPhone | formatPhone }}</span></div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Financeiro -->
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Financeiro</mat-card-title>
+        </mat-card-header>
+        <mat-card-content style="margin-top:16px">
+          <div class="info-row">
+            <span>Valor acordado:</span>
+            <span>{{ student.agreedMonthlyValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="info-row">
+            <span>Valor atual:</span>
+            <span>
+              {{ student.currentMonthlyValue | currency:'BRL':'symbol':'1.2-2' }}
+              @if (hasDiscount()) {
+                <mat-chip color="warn" style="margin-left:8px">
+                  Desconto {{ student.discountPercentage | number:'1.1-1' }}%
+                </mat-chip>
+              }
+            </span>
+          </div>
+          @if (hasDiscount()) {
+            <div class="info-row">
+              <span>Desconto:</span>
+              <span>{{ student.discountAmount | currency:'BRL':'symbol':'1.2-2' }}</span>
+            </div>
+          }
+          <div class="info-row">
+            <span>Forma de pagamento:</span>
+            <mat-chip>{{ paymentLabels[student.preferredPaymentMethod] }}</mat-chip>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Observações -->
+      @if (student.notes) {
+        <mat-card style="grid-column: 1 / -1">
+          <mat-card-header>
+            <mat-card-title>Observações</mat-card-title>
+          </mat-card-header>
+          <mat-card-content style="margin-top:16px">
+            <p style="white-space:pre-wrap; margin:0">{{ student.notes }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <p style="color:#999; font-size:12px; margin-top:16px">
+      Cadastrado em: {{ student.createdAt | date:'dd/MM/yyyy HH:mm' }}
+    </p>
+  }
+</div>
+
+<style>
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .info-row span:first-child { color: #666; font-size: 14px; }
+  .info-row span:last-child  { font-weight: 500; }
+</style>
