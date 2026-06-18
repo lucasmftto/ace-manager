@@ -80,16 +80,6 @@ App disponível em `http://localhost:4200`. As chamadas à API são proxiadas au
 
 ---
 
-## Usuário padrão
-
-| Campo | Valor |
-|-------|-------|
-| E-mail | lucasmelofavaretto@hotmail.com |
-| Senha | 1q2w3e |
-| Perfil | ROLE_OWNER |
-
----
-
 ## Testes (backend)
 
 ```bash
