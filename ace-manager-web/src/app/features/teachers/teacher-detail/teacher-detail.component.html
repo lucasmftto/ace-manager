@@ -1,0 +1,119 @@
+<div class="detail-page">
+
+  <div class="detail-topbar">
+    <button mat-icon-button (click)="goToList()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="detail-title">{{ teacher?.name || 'Professor' }}</span>
+    <span style="flex:1"></span>
+    @if (teacher) {
+      <button mat-stroked-button (click)="delete()" style="color:#c62828; border-color:#c62828; margin-right:8px">
+        <mat-icon>delete_outline</mat-icon> Excluir
+      </button>
+      <button mat-raised-button color="primary" (click)="goToEdit()">
+        <mat-icon>edit</mat-icon> Editar
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Carregando...</div>
+  } @else if (errorMsg) {
+    <div class="error-state">{{ errorMsg }}</div>
+  } @else if (teacher) {
+    <div class="detail-body">
+
+      <div class="cards-row">
+        <!-- Dados Pessoais -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>person</mat-icon>
+            <mat-card-title>Dados Pessoais</mat-card-title>
+          </mat-card-header>
+          <mat-card-content style="margin-top:16px">
+            <div class="info-row"><span>Telefone:</span><span>{{ teacher.phone | formatPhone }}</span></div>
+            <div class="info-row"><span>E-mail:</span>  <span>{{ teacher.email || '—' }}</span></div>
+            <div class="info-row"><span>Status:</span>
+              <mat-chip [class]="'status-chip status-' + teacher.status.toLowerCase()">
+                {{ statusLabels[teacher.status] }}
+              </mat-chip>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Repasse -->
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>payments</mat-icon>
+            <mat-card-title>Repasse</mat-card-title>
+          </mat-card-header>
+          <mat-card-content style="margin-top:16px">
+            <div class="info-row"><span>Modelo:</span>        <span>{{ payoutLabels[teacher.payoutModel] }}</span></div>
+            <div class="info-row"><span>Valor padrão:</span>  <span>{{ defaultValueLabel }}</span></div>
+            <div class="info-row"><span>Overrides ativos:</span>
+              <span>{{ teacher.studentConfigs.length }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Configuração por aluno -->
+      <app-student-config-table
+        [teacherId]="teacher.id"
+        [payoutModel]="teacher.payoutModel"
+        [defaultPercentage]="teacher.defaultPercentage"
+        [defaultHourlyRate]="teacher.defaultHourlyRate">
+      </app-student-config-table>
+
+    </div>
+  }
+</div>
+
+<style>
+  .detail-page { min-height: 100vh; background: var(--color-surface); }
+
+  .detail-topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    .detail-title { font-size: 18px; font-weight: 500; color: #1a1a2e; }
+  }
+
+  .loading-state, .error-state { text-align: center; padding: 64px; color: #666; }
+
+  .detail-body { padding: 24px; max-width: 960px; margin: 0 auto; }
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .info-card { mat-icon[mat-card-avatar] { color: var(--color-primary); } }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    &:last-child { border-bottom: none; }
+    span:first-child { color: #666; }
+    span:last-child  { font-weight: 500; }
+  }
+
+  .status-chip {
+    font-size: 12px;
+    &.status-active   { background: #e8f5e9; color: #2e7d32; }
+    &.status-inactive { background: #fafafa; color: #757575; }
+  }
+</style>

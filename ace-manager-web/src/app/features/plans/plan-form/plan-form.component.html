@@ -1,0 +1,158 @@
+<div class="form-page">
+
+  <div class="form-topbar">
+    <button mat-icon-button (click)="cancel()"><mat-icon>arrow_back</mat-icon></button>
+    <span class="form-topbar-title">{{ isEdit ? 'Editar Plano' : 'Novo Plano' }}</span>
+    <span style="flex:1"></span>
+    <button mat-stroked-button class="btn-cancel" type="button" (click)="cancel()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" form="planForm"
+            [disabled]="saving" style="margin-left:8px">
+      {{ saving ? 'Salvando...' : (isEdit ? 'Salvar alterações' : 'Criar plano') }}
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Carregando...</div>
+  } @else {
+    <div class="form-body">
+      <form id="planForm" [formGroup]="form" (ngSubmit)="submit()">
+
+        @if (errorMsg) {
+          <div class="form-error-banner"><mat-icon>error_outline</mat-icon> {{ errorMsg }}</div>
+        }
+
+        <!-- Identificação -->
+        <div class="form-section">
+          <div class="section-sidebar">
+            <mat-icon class="section-icon">inventory_2</mat-icon>
+            <span class="section-label">Identificação</span>
+          </div>
+          <div class="section-fields">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nome do plano *</mat-label>
+              <input matInput formControlName="name">
+              @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+                <mat-error>Nome é obrigatório</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Descrição</mat-label>
+              <textarea matInput formControlName="description" rows="2"></textarea>
+            </mat-form-field>
+
+            <div class="fields-row">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Tipo de plano *</mat-label>
+                <mat-select formControlName="type">
+                  @for (t of planTypes; track t) {
+                    <mat-option [value]="t">{{ typeLabels[t] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Preço de referência *</mat-label>
+                <input matInput currencyMask formControlName="referencePrice">
+                @if (form.controls.referencePrice.hasError('required') && form.controls.referencePrice.touched) {
+                  <mat-error>Obrigatório</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            @if (isEdit) {
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status">
+                  @for (s of statusOptions; track s) {
+                    <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+          </div>
+        </div>
+
+        <!-- Configuração por tipo -->
+        @if (isMonthly) {
+          <div class="form-section">
+            <div class="section-sidebar">
+              <mat-icon class="section-icon">calendar_month</mat-icon>
+              <span class="section-label">Mensalidade</span>
+            </div>
+            <div class="section-fields">
+              <div class="fields-row">
+                <mat-form-field appearance="outline" class="field-half">
+                  <mat-label>Aulas por semana</mat-label>
+                  <input matInput type="number" formControlName="weeklyClassCount" min="1">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="field-half">
+                  <mat-label>Dia de cobrança (1–28)</mat-label>
+                  <input matInput type="number" formControlName="billingDayOfMonth" min="1" max="28">
+                  @if (form.controls.billingDayOfMonth.hasError('min') || form.controls.billingDayOfMonth.hasError('max')) {
+                    <mat-error>Entre 1 e 28</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (isBundle) {
+          <div class="form-section">
+            <div class="section-sidebar">
+              <mat-icon class="section-icon">confirmation_number</mat-icon>
+              <span class="section-label">Pacote</span>
+            </div>
+            <div class="section-fields">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Total de aulas *</mat-label>
+                <input matInput type="number" formControlName="totalClasses" min="1">
+              </mat-form-field>
+            </div>
+          </div>
+        }
+
+        @if (isGroup) {
+          <div class="form-section">
+            <div class="section-sidebar">
+              <mat-icon class="section-icon">groups</mat-icon>
+              <span class="section-label">Turma</span>
+            </div>
+            <div class="section-fields">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Máximo de alunos *</mat-label>
+                <input matInput type="number" formControlName="maxStudents" min="1">
+              </mat-form-field>
+            </div>
+          </div>
+        }
+
+      </form>
+    </div>
+  }
+</div>
+
+<style>
+  .form-page { min-height: 100vh; background: var(--color-surface); display: flex; flex-direction: column; }
+  .form-topbar { display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: white;
+    border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 10;
+    .form-topbar-title { font-size: 18px; font-weight: 500; color: #1a1a2e; }
+    .btn-cancel { border-color: #ccc; color: #666; }
+  }
+  .loading-state { text-align: center; padding: 64px; color: #666; }
+  .form-error-banner { display: flex; align-items: center; gap: 8px; background: #fdecea; color: #c62828;
+    padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+  .form-body { padding: 32px 24px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .form-section { display: flex; border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .section-sidebar { display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; width: 120px; min-width: 120px; background: var(--color-topbar); padding: 24px 12px; text-align: center;
+    .section-icon { color: var(--color-primary); font-size: 28px; width: 28px; height: 28px; }
+    .section-label { color: white; font-size: 12px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+  }
+  .section-fields { flex: 1; background: white; padding: 24px; display: flex; flex-direction: column; }
+  .field-full { width: 100%; }
+  .fields-row { display: flex; gap: 16px; width: 100%; }
+  .field-half { flex: 1; }
+</style>

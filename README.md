@@ -9,7 +9,7 @@ Sistema de gestão para academias de tênis. Centraliza o gerenciamento de aluno
 | # | Módulo               | Status |
 |---|----------------------|--------|
 | 1 | Alunos               | ✅ Implementado |
-| 2 | Professores          | 🔲 Pendente |
+| 2 | Professores          | ✅ Implementado |
 | 3 | Planos & Pacotes     | 🔲 Pendente |
 | 4 | Gestão de Aulas      | 🔲 Pendente |
 | 5 | Financeiro do Aluno  | 🔲 Pendente |

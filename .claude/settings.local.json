@@ -9,7 +9,12 @@
       "Bash(ng build *)",
       "Bash(node -e \"const m = require\\('./node_modules/ngx-currency'\\); console.log\\(Object.keys\\(m\\)\\)\")",
       "Bash(npm view *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(./mvnw test *)",
+      "Bash(mvn test *)",
+      "Bash(npx ng *)",
+      "Bash(mvn compile *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

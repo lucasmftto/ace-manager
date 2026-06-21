@@ -1,0 +1,195 @@
+<div class="detail-page">
+
+  <div class="detail-topbar">
+    <button mat-icon-button (click)="goToList()"><mat-icon>arrow_back</mat-icon></button>
+    <span class="detail-title">{{ schedule?.name ?? 'Grade de Aula' }}</span>
+    <span style="flex:1"></span>
+    @if (schedule) {
+      <button mat-raised-button color="primary" (click)="goToEdit()">
+        <mat-icon>edit</mat-icon> Editar
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Carregando...</div>
+  } @else if (!schedule) {
+    <div class="loading-state">Grade não encontrada.</div>
+  } @else {
+    <div class="detail-body">
+
+      <!-- Info -->
+      <div class="info-card">
+        <div class="card-sidebar">
+          <mat-icon class="card-icon">event_repeat</mat-icon>
+          <span class="card-label">Grade</span>
+        </div>
+        <div class="card-fields">
+          <div class="field-row">
+            <div class="field-item">
+              <span class="field-label">Dia</span>
+              <span class="field-value">{{ dayLabels[schedule.dayOfWeek] }}</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Horário</span>
+              <span class="field-value">{{ formatTime(schedule.startTime) }} · {{ schedule.durationMinutes }}min</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Professor</span>
+              <span class="field-value">{{ schedule.teacherName }}</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Tipo</span>
+              <mat-chip [class]="'type-chip type-' + schedule.type.toLowerCase()">{{ typeLabels[schedule.type] }}</mat-chip>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Status</span>
+              <mat-chip [class]="'status-chip status-' + schedule.status.toLowerCase()">{{ statusLabels[schedule.status] }}</mat-chip>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Students -->
+      <div class="info-card">
+        <div class="card-sidebar">
+          <mat-icon class="card-icon">group</mat-icon>
+          <span class="card-label">Alunos</span>
+        </div>
+        <div class="card-fields">
+          @if (errorMsg) {
+            <div class="error-banner"><mat-icon>error_outline</mat-icon> {{ errorMsg }}</div>
+          }
+
+          <table mat-table [dataSource]="dataSource" class="enrolled-table">
+            <ng-container matColumnDef="studentName">
+              <th mat-header-cell *matHeaderCellDef>Aluno</th>
+              <td mat-cell *matCellDef="let s">{{ s.studentName }}</td>
+            </ng-container>
+            <ng-container matColumnDef="planName">
+              <th mat-header-cell *matHeaderCellDef>Plano vinculado</th>
+              <td mat-cell *matCellDef="let s">{{ s.studentPlanName ?? '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let s">
+                <button mat-icon-button color="warn" (click)="removeStudent(s.studentId)" matTooltip="Remover">
+                  <mat-icon>remove_circle_outline</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell empty-state" colspan="3">Nenhum aluno inscrito.</td>
+            </tr>
+          </table>
+
+          @if (!showAddForm) {
+            <button mat-stroked-button (click)="showAddForm = true" style="margin-top:12px">
+              <mat-icon>person_add</mat-icon> Adicionar aluno
+            </button>
+          } @else {
+            <div class="add-student-form" [formGroup]="addForm">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Aluno *</mat-label>
+                <mat-select formControlName="studentId">
+                  @for (s of students; track s.id) {
+                    <mat-option [value]="s.id">{{ s.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <div class="field-half plans-field">
+                <mat-form-field appearance="outline" style="width:100%">
+                  <mat-label>Plano (opcional)</mat-label>
+                  <mat-select formControlName="studentPlanId" [disabled]="loadingPlans">
+                    <mat-option [value]="null">Sem plano vinculado</mat-option>
+                    @for (p of studentPlans; track p.id) {
+                      <mat-option [value]="p.id">{{ p.planName }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (loadingPlans) {
+                    <mat-suffix><mat-spinner diameter="18" style="margin:4px"></mat-spinner></mat-suffix>
+                  }
+                </mat-form-field>
+                @if (!loadingPlans && plansError) {
+                  <div class="plans-hint error">{{ plansError }}</div>
+                } @else if (!loadingPlans && addForm.get('studentId')?.value && studentPlans.length === 0) {
+                  <div class="plans-hint">
+                    <mat-icon style="font-size:14px;height:14px;width:14px;vertical-align:middle">info_outline</mat-icon>
+                    Este aluno não possui planos ativos. Cadastre uma matrícula em <strong>Planos</strong> primeiro.
+                  </div>
+                }
+              </div>
+              <div class="add-actions">
+                <button mat-raised-button color="primary" (click)="addStudent()" [disabled]="adding">
+                  {{ adding ? 'Adicionando...' : 'Confirmar' }}
+                </button>
+                <button mat-button (click)="showAddForm = false; addForm.reset()">Cancelar</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Generate occurrences -->
+      <div class="info-card">
+        <div class="card-sidebar">
+          <mat-icon class="card-icon">auto_awesome</mat-icon>
+          <span class="card-label">Aulas</span>
+        </div>
+        <div class="card-fields" style="display:flex;align-items:center;gap:16px">
+          <button mat-stroked-button (click)="generateOccurrences()" [disabled]="generatingOcc">
+            <mat-icon>event</mat-icon> {{ generatingOcc ? 'Gerando...' : 'Gerar próximas 4 semanas' }}
+          </button>
+          @if (generateMsg) {
+            <span class="generate-msg">{{ generateMsg }}</span>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
+
+<style>
+  .detail-page { min-height: 100vh; background: var(--color-surface); display: flex; flex-direction: column; }
+  .detail-topbar { display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: white;
+    border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 10;
+    .detail-title { font-size: 18px; font-weight: 500; color: #1a1a2e; }
+  }
+  .loading-state { text-align: center; padding: 64px; color: #666; }
+  .detail-body { padding: 32px 24px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .info-card { display: flex; border-radius: 10px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .card-sidebar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    width: 120px; min-width: 120px; background: var(--color-topbar); padding: 24px 12px; text-align: center;
+    .card-icon { color: var(--color-primary); font-size: 28px; width: 28px; height: 28px; }
+    .card-label { color: white; font-size: 12px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+  }
+  .card-fields { flex: 1; background: white; padding: 24px; }
+  .field-row { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 16px; }
+  .field-item { min-width: 120px;
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .field-value { font-size: 15px; color: #1a1a2e; }
+  }
+  .type-chip { font-size: 11px !important;
+    &.type-individual { background: #e8f5e9 !important; color: #2e7d32 !important; }
+    &.type-group      { background: #e3f2fd !important; color: #1565c0 !important; }
+  }
+  .status-chip {
+    &.status-active   { background: #e8f5e9 !important; color: #2e7d32 !important; }
+    &.status-inactive { background: #fafafa !important; color: #757575 !important; }
+  }
+  .enrolled-table { width: 100%; }
+  .empty-state { text-align: center; padding: 24px; color: #999; }
+  .error-banner { display: flex; align-items: center; gap: 8px; background: #fdecea; color: #c62828;
+    padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+  .add-student-form { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-top: 16px;
+    border-top: 1px solid #f0f0f0; padding-top: 16px; }
+  .field-half { flex: 1; min-width: 200px; }
+  .plans-field { display: flex; flex-direction: column; }
+  .plans-hint { font-size: 12px; color: #666; margin-top: -12px; display: flex; align-items: center; gap: 4px; }
+  .plans-hint.error { color: #c62828; }
+  .add-actions { display: flex; gap: 8px; align-items: center; padding-top: 8px; }
+  .generate-msg { font-size: 13px; color: var(--color-primary); font-weight: 500; }
+</style>

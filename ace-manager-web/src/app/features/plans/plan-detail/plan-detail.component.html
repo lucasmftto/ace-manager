@@ -1,0 +1,119 @@
+<div class="detail-page">
+
+  <div class="detail-topbar">
+    <button mat-icon-button (click)="goToList()"><mat-icon>arrow_back</mat-icon></button>
+    <span class="detail-title">{{ plan?.name ?? 'Plano' }}</span>
+    <span style="flex:1"></span>
+    @if (plan) {
+      <button mat-stroked-button color="warn" (click)="deactivate()" [disabled]="plan.status === 'INACTIVE'">
+        <mat-icon>block</mat-icon> Inativar
+      </button>
+      <button mat-raised-button color="primary" (click)="goToEdit()" style="margin-left:8px">
+        <mat-icon>edit</mat-icon> Editar
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Carregando...</div>
+  } @else if (!plan) {
+    <div class="loading-state">Plano não encontrado.</div>
+  } @else {
+    <div class="detail-body">
+
+      <!-- Identificação -->
+      <div class="info-card">
+        <div class="card-sidebar">
+          <mat-icon class="card-icon">inventory_2</mat-icon>
+          <span class="card-label">Identificação</span>
+        </div>
+        <div class="card-fields">
+          <div class="field-row">
+            <div class="field-item">
+              <span class="field-label">Nome</span>
+              <span class="field-value">{{ plan.name }}</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Tipo</span>
+              <mat-chip [class]="'type-chip type-' + plan.type.toLowerCase()">{{ typeLabels[plan.type] }}</mat-chip>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Status</span>
+              <mat-chip [class]="'status-chip status-' + plan.status.toLowerCase()">{{ statusLabels[plan.status] }}</mat-chip>
+            </div>
+          </div>
+          @if (plan.description) {
+            <div class="field-row">
+              <div class="field-item wide">
+                <span class="field-label">Descrição</span>
+                <span class="field-value">{{ plan.description }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Financeiro -->
+      <div class="info-card">
+        <div class="card-sidebar">
+          <mat-icon class="card-icon">payments</mat-icon>
+          <span class="card-label">Financeiro</span>
+        </div>
+        <div class="card-fields">
+          <div class="field-row">
+            <div class="field-item">
+              <span class="field-label">Preço de referência</span>
+              <span class="field-value">R$ {{ plan.referencePrice | number:'1.2-2':'pt' }}</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Matrículas ativas</span>
+              <span class="field-value">{{ plan.activeEnrollments }}</span>
+            </div>
+            @if (plan.type !== 'DROP_IN') {
+              <div class="field-item">
+                <span class="field-label">Configuração</span>
+                <span class="field-value">{{ typeDetailLabel(plan) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
+
+<style>
+  .detail-page { min-height: 100vh; background: var(--color-surface); display: flex; flex-direction: column; }
+  .detail-topbar { display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: white;
+    border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 10;
+    .detail-title { font-size: 18px; font-weight: 500; color: #1a1a2e; }
+  }
+  .loading-state { text-align: center; padding: 64px; color: #666; }
+  .detail-body { padding: 32px 24px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .info-card { display: flex; border-radius: 10px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .card-sidebar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    width: 120px; min-width: 120px; background: var(--color-topbar); padding: 24px 12px; text-align: center;
+    .card-icon { color: var(--color-primary); font-size: 28px; width: 28px; height: 28px; }
+    .card-label { color: white; font-size: 12px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+  }
+  .card-fields { flex: 1; background: white; padding: 24px; }
+  .field-row { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 16px;
+    &:last-child { margin-bottom: 0; }
+  }
+  .field-item { min-width: 140px;
+    &.wide { flex: 1; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .field-value { font-size: 15px; color: #1a1a2e; }
+  }
+  .type-chip { font-size: 11px !important;
+    &.type-monthly  { background: #e8f5e9 !important; color: #2e7d32 !important; }
+    &.type-bundle   { background: #e3f2fd !important; color: #1565c0 !important; }
+    &.type-drop_in  { background: #fff3e0 !important; color: #e65100 !important; }
+    &.type-group    { background: #f3e5f5 !important; color: #6a1b9a !important; }
+  }
+  .status-chip {
+    &.status-active   { background: #e8f5e9 !important; color: #2e7d32 !important; }
+    &.status-inactive { background: #fafafa !important; color: #757575 !important; }
+  }
+</style>

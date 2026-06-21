@@ -1,0 +1,157 @@
+<div class="detail-page">
+
+  <div class="detail-topbar">
+    <button mat-icon-button (click)="goBack()"><mat-icon>arrow_back</mat-icon></button>
+    <span class="detail-title">Detalhes da Aula</span>
+    <span style="flex:1"></span>
+    @if (occurrence && !isCancelled()) {
+      <button mat-stroked-button color="warn" (click)="cancelOccurrence()">
+        <mat-icon>cancel</mat-icon> Cancelar aula
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Carregando...</div>
+  } @else if (!occurrence) {
+    <div class="loading-state">Aula não encontrada.</div>
+  } @else {
+    <div class="detail-body">
+
+      <!-- Info card -->
+      <div class="info-card">
+        <div class="card-sidebar">
+          <mat-icon class="card-icon">sports_tennis</mat-icon>
+          <span class="card-label">Aula</span>
+        </div>
+        <div class="card-fields">
+          <div class="field-row">
+            <div class="field-item">
+              <span class="field-label">Grade</span>
+              <span class="field-value link" (click)="goToSchedule()">{{ occurrence.scheduleName }}</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Data</span>
+              <span class="field-value">{{ formatDate(occurrence.occurrenceDate) }}</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Horário</span>
+              <span class="field-value">{{ formatTime(occurrence.startTime) }} · {{ occurrence.durationMinutes }}min</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Professor</span>
+              <span class="field-value">{{ occurrence.teacherName }}</span>
+            </div>
+            <div class="field-item">
+              <span class="field-label">Status</span>
+              <span class="status-badge" [class]="'badge-' + occurrence.status.toLowerCase()">
+                {{ statusLabels[occurrence.status] }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance card -->
+      <div class="info-card">
+        <div class="card-sidebar">
+          <mat-icon class="card-icon">fact_check</mat-icon>
+          <span class="card-label">Presença</span>
+        </div>
+        <div class="card-fields">
+          @if (errorMsg) {
+            <div class="error-banner"><mat-icon>error_outline</mat-icon> {{ errorMsg }}</div>
+          }
+
+          @if (attendanceRows.length === 0) {
+            <p class="empty-msg">Nenhum aluno inscrito nesta aula.</p>
+          } @else {
+            <div class="attendance-list">
+              @for (row of attendanceRows; track row.studentId) {
+                <div class="attendance-row">
+                  <span class="student-name">{{ row.studentName }}</span>
+                  <div class="attendance-toggles">
+                    @for (opt of attendanceOptions; track opt) {
+                      <button class="toggle-btn"
+                              [class.active]="row.status === opt"
+                              [class.present]="opt === 'PRESENT'"
+                              [class.absent]="opt === 'ABSENT'"
+                              [class.justified]="opt === 'JUSTIFIED_ABSENCE'"
+                              [disabled]="isCancelled()"
+                              (click)="row.status = opt">
+                        {{ attendanceLabels[opt] }}
+                      </button>
+                    }
+                  </div>
+                  @if (row.status === 'PRESENT' && row.teacherPayoutValue !== null) {
+                    <div class="payout-info">
+                      <span>Repasse: <strong>{{ row.teacherPayoutValue | currency:'BRL':'symbol':'1.2-2' }}</strong></span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (!isCancelled()) {
+              <div class="save-row">
+                <button mat-raised-button color="primary" (click)="saveAttendance()" [disabled]="saving">
+                  {{ saving ? 'Salvando...' : 'Salvar presenças' }}
+                </button>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
+
+<style>
+  .detail-page { min-height: 100vh; background: var(--color-surface); display: flex; flex-direction: column; }
+  .detail-topbar { display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: white;
+    border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 10;
+    .detail-title { font-size: 18px; font-weight: 500; color: #1a1a2e; }
+  }
+  .loading-state { text-align: center; padding: 64px; color: #666; }
+  .detail-body { padding: 32px 24px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .info-card { display: flex; border-radius: 10px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .card-sidebar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    width: 120px; min-width: 120px; background: var(--color-topbar); padding: 24px 12px; text-align: center;
+    .card-icon { color: var(--color-primary); font-size: 28px; width: 28px; height: 28px; }
+    .card-label { color: white; font-size: 12px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+  }
+  .card-fields { flex: 1; background: white; padding: 24px; }
+  .field-row { display: flex; gap: 32px; flex-wrap: wrap; }
+  .field-item { min-width: 120px;
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .field-value { font-size: 15px; color: #1a1a2e;
+      &.link { color: var(--color-primary); cursor: pointer; &:hover { text-decoration: underline; } }
+    }
+  }
+  .status-badge { font-size: 12px; padding: 3px 10px; border-radius: 12px;
+    &.badge-scheduled  { background: #e3f2fd; color: #1565c0; }
+    &.badge-completed  { background: #e8f5e9; color: #2e7d32; }
+    &.badge-cancelled  { background: #fafafa; color: #999; }
+  }
+  .error-banner { display: flex; align-items: center; gap: 8px; background: #fdecea; color: #c62828;
+    padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; }
+  .empty-msg { color: #999; font-size: 14px; padding: 8px 0; }
+  .attendance-list { display: flex; flex-direction: column; gap: 12px; }
+  .attendance-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    &:last-child { border-bottom: none; }
+    .student-name { font-size: 14px; font-weight: 500; min-width: 160px; }
+  }
+  .attendance-toggles { display: flex; gap: 6px; }
+  .toggle-btn { padding: 5px 12px; border: 1.5px solid #ccc; border-radius: 20px; background: white;
+    font-size: 12px; cursor: pointer; transition: all .15s;
+    &:disabled { opacity: .5; cursor: not-allowed; }
+    &.active.present   { background: #e8f5e9; border-color: #2e7d32; color: #2e7d32; font-weight: 600; }
+    &.active.absent    { background: #fdecea; border-color: #c62828; color: #c62828; font-weight: 600; }
+    &.active.justified { background: #fff3e0; border-color: #e65100; color: #e65100; font-weight: 600; }
+    &:hover:not(:disabled) { border-color: #999; }
+  }
+  .payout-info { font-size: 12px; color: #666; margin-left: auto; }
+  .save-row { margin-top: 20px; display: flex; justify-content: flex-end; }
+</style>

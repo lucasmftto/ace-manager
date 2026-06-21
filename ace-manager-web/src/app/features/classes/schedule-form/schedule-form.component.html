@@ -1,0 +1,133 @@
+<div class="form-page">
+
+  <div class="form-topbar">
+    <button mat-icon-button (click)="cancel()"><mat-icon>arrow_back</mat-icon></button>
+    <span class="form-topbar-title">{{ isEdit ? 'Editar Grade' : 'Nova Grade de Aula' }}</span>
+    <span style="flex:1"></span>
+    <button mat-stroked-button type="button" (click)="cancel()" style="border-color:#ccc;color:#666">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" form="schedForm"
+            [disabled]="saving" style="margin-left:8px">
+      {{ saving ? 'Salvando...' : (isEdit ? 'Salvar alterações' : 'Criar grade') }}
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">Carregando...</div>
+  } @else {
+    <div class="form-body">
+      <form id="schedForm" [formGroup]="form" (ngSubmit)="submit()">
+
+        @if (errorMsg) {
+          <div class="form-error-banner"><mat-icon>error_outline</mat-icon> {{ errorMsg }}</div>
+        }
+
+        <div class="form-section">
+          <div class="section-sidebar">
+            <mat-icon class="section-icon">event_repeat</mat-icon>
+            <span class="section-label">Grade</span>
+          </div>
+          <div class="section-fields">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Nome da grade *</mat-label>
+              <input matInput formControlName="name" placeholder="Ex: Ana - Individual - Segunda 07h">
+              @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+                <mat-error>Obrigatório</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="fields-row">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Dia da semana *</mat-label>
+                <mat-select formControlName="dayOfWeek">
+                  @for (d of daysOfWeek; track d) {
+                    <mat-option [value]="d">{{ dayLabels[d] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Horário de início *</mat-label>
+                <input matInput type="time" formControlName="startTime">
+                @if (form.controls.startTime.hasError('required') && form.controls.startTime.touched) {
+                  <mat-error>Obrigatório</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="fields-row">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Duração (minutos) *</mat-label>
+                <input matInput type="number" formControlName="durationMinutes" min="30">
+                @if (form.controls.durationMinutes.hasError('min')) {
+                  <mat-error>Mínimo 30 minutos</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Professor *</mat-label>
+                <mat-select formControlName="teacherId">
+                  @for (t of teachers; track t.id) {
+                    <mat-option [value]="t.id">{{ t.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="fields-row">
+              <mat-form-field appearance="outline" class="field-half">
+                <mat-label>Tipo *</mat-label>
+                <mat-select formControlName="type">
+                  @for (t of classTypes; track t) {
+                    <mat-option [value]="t">{{ typeLabels[t] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              @if (isGroup) {
+                <mat-form-field appearance="outline" class="field-half">
+                  <mat-label>Máx. alunos *</mat-label>
+                  <input matInput type="number" formControlName="maxStudents" min="2">
+                </mat-form-field>
+              }
+
+              @if (isEdit) {
+                <mat-form-field appearance="outline" class="field-half">
+                  <mat-label>Status</mat-label>
+                  <mat-select formControlName="status">
+                    @for (s of statusOptions; track s) {
+                      <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  }
+</div>
+
+<style>
+  .form-page { min-height: 100vh; background: var(--color-surface); display: flex; flex-direction: column; }
+  .form-topbar { display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: white;
+    border-bottom: 1px solid var(--color-border); position: sticky; top: 0; z-index: 10;
+    .form-topbar-title { font-size: 18px; font-weight: 500; color: #1a1a2e; }
+  }
+  .loading-state { text-align: center; padding: 64px; color: #666; }
+  .form-error-banner { display: flex; align-items: center; gap: 8px; background: #fdecea; color: #c62828;
+    padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+  .form-body { padding: 32px 24px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .form-section { display: flex; border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .section-sidebar { display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; width: 120px; min-width: 120px; background: var(--color-topbar); padding: 24px 12px; text-align: center;
+    .section-icon { color: var(--color-primary); font-size: 28px; width: 28px; height: 28px; }
+    .section-label { color: white; font-size: 12px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+  }
+  .section-fields { flex: 1; background: white; padding: 24px; display: flex; flex-direction: column; }
+  .field-full { width: 100%; }
+  .fields-row { display: flex; gap: 16px; width: 100%; }
+  .field-half { flex: 1; }
+</style>
